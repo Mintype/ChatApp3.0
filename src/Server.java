@@ -12,7 +12,7 @@ public class Server {
     private static ServerSocket serverSocket = null;
     private static Socket clientSocket = null;
     private static final int maxClientsCount = 10;
-    private static final int portNumber = 12345;
+    private static final int portNumber = 13425;
 
     private static final clientThread[] threads = new clientThread[maxClientsCount];
 
@@ -22,22 +22,23 @@ public class Server {
 
         try {
             Database database = new Database();
+            GraphicalInterface gui = new GraphicalInterface();
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
         try {
             serverSocket = new ServerSocket(portNumber);
-            int i = 0;
+            int k = 0;
             while (true) {
                 clientSocket = serverSocket.accept();
-                for (i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] == null) {
-                        (threads[i] = new clientThread(clientSocket, threads)).start();
+                for (k = 0; k < maxClientsCount; k++) {
+                    if (threads[k] == null) {
+                        (threads[k] = new clientThread(clientSocket, threads)).start();
                         break;
                     }
                 }
-                if (i == maxClientsCount) {
+                if (k == maxClientsCount) {
                     PrintStream os = new PrintStream(clientSocket.getOutputStream());
                     os.println("Server too busy. Try later.");
                     os.close();
@@ -84,9 +85,9 @@ class clientThread extends Thread {
             os = new PrintStream(clientSocket.getOutputStream());
 
             String name = is.readLine().trim(); // IMPORTANT
-            for (int i = 0; i < maxClientsCount; i++) {
-                if (threads[i] != null && threads[i] != this) {
-                    threads[i].os.println( name + " has connected to the server.");
+            for (int k = 0; k < maxClientsCount; k++) {
+                if (threads[k] != null && threads[k] != this) {
+                    threads[k].os.println( name + " has connected to the server.");
                 }
             }
             while (true) {
@@ -95,20 +96,20 @@ class clientThread extends Thread {
                 if (line.startsWith("/exit")) {
                     break;
                 }
-                for (int i = 0; i < maxClientsCount; i++) {
-                    if (threads[i] != null) {
-                        threads[i].os.println("[" + name + "] : " + line);
+                for (int k = 0; k < maxClientsCount; k++) {
+                    if (threads[k] != null) {
+                        threads[k].os.println("[" + name + "] : " + line);
                     }
                 }
             }
-            for (int i = 0; i < maxClientsCount; i++) {
-                if (threads[i] != null && threads[i] != this) {
-                    threads[i].os.println( name + " is disconnecting from the server.");
+            for (int k = 0; k < maxClientsCount; k++) {
+                if (threads[k] != null && threads[k] != this) {
+                    threads[k].os.println( name + " is disconnecting from the server.");
                 }
             }
-            for (int i = 0; i < maxClientsCount; i++) {
-                if (threads[i] == this) {
-                    threads[i] = null;
+            for (int k = 0; k < maxClientsCount; k++) {
+                if (threads[k] == this) {
+                    threads[k] = null;
                 }
             }
             is.close();
